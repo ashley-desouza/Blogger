@@ -21,7 +21,15 @@ module.exports = app => {
 
   // OAuth Authentication Callback Route Handler
   // This is the Route Handler that is defined in the GoogleStrategy
-  app.get('/auth/google/callback', passport.authenticate('google'));
+  app.get(
+    '/auth/google/callback',
+    passport.authenticate('google'),
+    (req, res) => {
+      // Redirect the user to the 'Dashboard' page
+      // The 'Dashboard' page lives at the `/blogs` route
+      res.redirect('/blogs');
+    }
+  );
 
   // User Logout Route Handler
   app.get('/api/logout', (req, res) => {
@@ -30,7 +38,9 @@ module.exports = app => {
     // that is inserted inside the cookie
     // Hence, invoking req.user will return undefined
     req.logout();
-    res.send(req.user);
+
+    // Redirect the user to the 'Landing' page
+    res.redirect('/');
   });
 
   // Route Handler to get the current logged in User
