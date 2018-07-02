@@ -1,0 +1,23 @@
+{
+  "name": "blogger",
+  "version": "1.0.0",
+  "description": "A NodeJS / Express Server for a Blogging API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon index.js --ignore client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashley-desouza/Blogger.git"
+  },
+  "author": "Ashley DeSouza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ashley-desouza/Blogger/issues"
+  },
+  "homepage": "https://github.com/ashley-desouza/Blogger#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
