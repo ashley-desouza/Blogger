@@ -26,6 +26,30 @@ const mongoose = require('mongoose');
 const User = mongoose.model('user');
 
 /*******************************************************************
+  Authentication -
+  Use passport.js serializeUser() method to serialize the User into
+  a session cookie
+
+  Reference - http://passportjs.org/docs/configure
+********************************************************************/
+passport.serializeUser((user, done) => {
+  // Serialize the id coming from MongoDB
+  done(null, user.id);
+});
+
+/*******************************************************************
+  Authentication -
+  Use passport.js deserializeUser() method to deserialize the
+  session cookie and retrieve the user from the fetched id
+
+  Reference - http://passportjs.org/docs/configure
+********************************************************************/
+passport.deserializeUser(async (id, done) => {
+  const newUser = await User.findById(id);
+  done(null, newUser);
+});
+
+/*******************************************************************
   Tell the base passport module that there is a new Strategy that
   we would like to use for User Authentication
 
@@ -57,9 +81,23 @@ passport.use(
       proxy: true
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log('accessToken:', accessToken);
-      console.log('refreshToken:', refreshToken);
-      console.log('profile:', profile);
+      // Search for an existing model instance having the provided profile.id
+      const existingUser = await User.findOne({ googleId: profile.id });
+
+      // Check if we were able to find a User in our database with the provided
+      // profile.id
+      if (!existingUser) {
+        // If there isn't an existing User,
+        // Create a new model instance -> MongoDB document
+        // Persist the new User document to the mlab MongoDB database
+        const newUser = await new User({ googleId: profile.id }).save();
+
+        done(null, newUser);
+      } else {
+        // If the user already exists in our MongoDB, we just exit out
+        // via done(err, res) method
+        done(null, existingUser);
+      }
     }
   )
 );

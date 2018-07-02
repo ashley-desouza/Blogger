@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieSession = require('cookie-session');
+const passport = require('passport');
 const keys = require('./config/keys');
 
 /*******************************************************************
@@ -38,6 +40,25 @@ mongoose.connection
  Create an Express App
 ********************************************************************/
 const app = express();
+
+/*******************************************************************
+ Middleware for the cookie-session module
+ Reference - https://www.npmjs.com/package/cookie-session
+********************************************************************/
+app.use(
+  cookieSession({
+    keys: [keys.cookieSession],
+    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+  })
+);
+
+/*******************************************************************
+ Middleware for using the 'passport' module to use the
+ 'cookie-session' module. In other words, tell 'passport' to use
+ cookies to handle authentication
+********************************************************************/
+app.use(passport.initialize());
+app.use(passport.session());
 
 /*******************************************************************
  Require the Route Handlers
