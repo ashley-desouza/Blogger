@@ -31,6 +31,20 @@ module.exports = app => {
   // Route Handler for fetching ALL Blogs belonging to the
   // logged in User
   app.get('/api/blogs', requireLogin, async (req, res) => {
+    const redis = require('redis');
+    const redisURL = 'redis://127.0.0.1:6379';
+    const client = redis.createClient(redisURL);
+
+    const util = require('util');
+    client.get = util.promisify(client.get);
+
+    // Check if there is an entry in the redis cache server
+    // for the provided query (key)
+    const cachedBlogs = client.get(req.user.id);
+
+    // If there is, then return that cached list of blogs
+
+    // Else, call mongoose to fetch the list of blogs
     const blogs = await Blog.find({ _user: req.user.id });
 
     res.send(blogs);
