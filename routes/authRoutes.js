@@ -1,3 +1,6 @@
+// Import the passport.js module
+const passport = require('passport');
+
 /*******************************************************************
   Export a function which contains the definitions of all the
   route handlers.
@@ -6,9 +9,15 @@
   an input argument
 ********************************************************************/
 module.exports = app => {
-  // Authentication Route Handler
-  app.get('/', (req, res) => {
-    // req.session
-    res.send('Connected');
-  });
+  // OAuth Authentication Route Handler
+  app.get(
+    '/auth/google',
+    passport.authenticate('google', {
+      scope: ['profile', 'email']
+    })
+  );
+
+  // OAuth Authentication Callback Route Handler
+  // This is the Route Handler that is defined in the GoogleStrategy
+  app.get('/auth/google/callback', passport.authenticate('google'));
 };
