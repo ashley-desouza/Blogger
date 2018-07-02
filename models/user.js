@@ -6,7 +6,8 @@ const { Schema } = mongoose;
 
 // Declare the User Mongoose Schema
 const userSchema = new Schema({
-  googleId: String
+  googleId: String,
+  displayName: String
 });
 
 // Create a model class -> 'user' collection

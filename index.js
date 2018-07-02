@@ -5,7 +5,7 @@ const passport = require('passport');
 const keys = require('./config/keys');
 
 /*******************************************************************
- Require in the 'User' collection, so that they can
+ Require in the 'User' and 'Blog' collection, so that they can
  be created in the database at run time.
 
  IMP - Import this before the passport Middleware as well as the 
@@ -14,6 +14,7 @@ const keys = require('./config/keys');
  should already have been registered
 ********************************************************************/
 require('./models/user');
+require('./models/blog');
 
 /*******************************************************************
  Require the customized 'passport' Middleware
@@ -64,6 +65,7 @@ app.use(passport.session());
  Require the Route Handlers
 ********************************************************************/
 require('./routes/authRoutes')(app);
+require('./routes/blogRoutes')(app);
 
 /*******************************************************************
  Define the PORT to listen on

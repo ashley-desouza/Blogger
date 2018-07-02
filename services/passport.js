@@ -90,7 +90,10 @@ passport.use(
         // If there isn't an existing User,
         // Create a new model instance -> MongoDB document
         // Persist the new User document to the mlab MongoDB database
-        const newUser = await new User({ googleId: profile.id }).save();
+        const newUser = await new User({
+          googleId: profile.id,
+          displayName: profile.displayName
+        }).save();
 
         done(null, newUser);
       } else {
