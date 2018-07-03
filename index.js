@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 const keys = require('./config/keys');
 
 /*******************************************************************
@@ -41,6 +42,15 @@ mongoose.connection
  Create an Express App
 ********************************************************************/
 const app = express();
+
+/*******************************************************************
+ Middleware for the body-parser module
+ It parses incoming request bodies in a middleware before
+ your handlers, available under the req.body property.
+
+ Reference - https://www.npmjs.com/package/body-parser
+********************************************************************/
+app.use(bodyParser.json());
 
 /*******************************************************************
  Middleware for the cookie-session module
