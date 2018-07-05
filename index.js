@@ -23,6 +23,11 @@ require('./models/blog');
 ********************************************************************/
 require('./services/passport');
 
+/*******************************************************************
+ Require the cache services file
+********************************************************************/
+require('./services/cache');
+
 // Mongoose's built in promise library is deprecated, replace it with
 // ES2015 Promise
 mongoose.Promise = global.Promise;

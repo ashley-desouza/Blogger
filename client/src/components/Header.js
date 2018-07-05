@@ -14,11 +14,14 @@ class Header extends Component {
           </li>
         );
       default:
-        return (
-          <li>
+        return [
+          <li key="3" style={{ margin: '0 10px' }}>
+            <Link to="/blogs">My Blogs</Link>
+          </li>,
+          <li key="2">
             <a href="/api/logout">Logout</a>
           </li>
-        );
+        ];
     }
   }
 
