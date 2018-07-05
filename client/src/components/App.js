@@ -6,10 +6,8 @@ import * as actions from '../actions';
 import Header from './Header';
 import Landing from './Landing';
 import Dashboard from './Dashboard';
-
-const BlogNew = () => {
-  return <div>New Blog</div>;
-};
+import BlogNew from './blogs/BlogNew';
+import BlogShow from './blogs/BlogShow';
 
 class App extends Component {
   componentDidMount() {
@@ -25,6 +23,7 @@ class App extends Component {
             <Route exact path="/" component={Landing} />
             <Route exact path="/blogs" component={Dashboard} />
             <Route exact path="/blogs/new" component={BlogNew} />
+            <Route exact path="/blogs/:_id" component={BlogShow} />
           </div>
         </BrowserRouter>
       </div>

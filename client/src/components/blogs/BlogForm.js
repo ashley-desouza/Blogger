@@ -40,7 +40,7 @@ class BlogForm extends Component {
 function validate(values) {
   const errors = {};
 
-  formFields.each(({ name }) => {
+  formFields.forEach(({ name }) => {
     if (!values[name]) {
       errors[name] = 'You must provide a value';
     }

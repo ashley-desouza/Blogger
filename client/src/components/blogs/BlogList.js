@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { fetchBlogs } from './../../actions';
 
 class BlogList extends Component {
@@ -8,7 +9,7 @@ class BlogList extends Component {
   }
 
   renderBlogs() {
-    return this.props.blogs.reverse().map(blog => {
+    return Object.values(this.props.blogs).map(blog => {
       return (
         <div className="card darken-1 horizontal" key={blog._id}>
           <div className="card-stacked">

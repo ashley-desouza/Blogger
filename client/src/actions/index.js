@@ -7,7 +7,7 @@ export const fetchUser = () => async dispatch =>
     payload: (await axios.get('/api/current_user')).data
   });
 
-export const submitBlog = values => async dispatch => {
+export const submitBlog = (values, history) => async dispatch => {
   const res = await axios.post('/api/blogs', values);
 
   // Redirect the user the /blogs route - The Dashboard
@@ -23,6 +23,7 @@ export const fetchBlogs = () => async dispatch => {
 
 export const fetchBlog = id => async dispatch => {
   const res = await axios.get(`/api/blogs/${id}`);
+  console.log('res:', res);
 
   dispatch({ type: FETCH_BLOG, payload: res.data });
 };

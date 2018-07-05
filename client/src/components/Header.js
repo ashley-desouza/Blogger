@@ -25,7 +25,7 @@ class Header extends Component {
   render() {
     return (
       <div>
-        <nav>
+        <nav className="cyan darken-2">
           <div className="nav-wrapper">
             <Link
               to={this.props.user ? '/blogs' : '/'}
