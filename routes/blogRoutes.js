@@ -9,6 +9,11 @@ const mongoose = require('mongoose');
 const requireLogin = require('./../middlewares/requireLogin');
 
 /*******************************************************************
+  Import the cleanCache middleware
+********************************************************************/
+const cleanCache = require('./../middlewares/cleanCache');
+
+/*******************************************************************
   Fetch the 'blog' collection
 
   This fetching is solely for the purposes of avoiding issues when
@@ -23,36 +28,37 @@ module.exports = app => {
   // Route Handler for fetching a Blog having a specific Id
   // and belonging to the logged in User
   app.get('/api/blogs/:id', requireLogin, async (req, res) => {
-    const blog = await Blog.findOne({ _user: req.user.id, _id: req.params.id });
+    try {
+      const blog = await Blog.findOne({
+        _user: req.user.id,
+        _id: req.params.id
+      });
 
-    res.send(blog);
+      res.send(blog);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
   });
 
   // Route Handler for fetching ALL Blogs belonging to the
   // logged in User
   app.get('/api/blogs', requireLogin, async (req, res) => {
-    const redis = require('redis');
-    const redisURL = 'redis://127.0.0.1:6379';
-    const client = redis.createClient(redisURL);
+    try {
+      const blogs = await Blog.find({ _user: req.user.id })
+        .sort({ createdAt: 1 })
+        .cache({
+          key: req.user.id
+        });
 
-    const util = require('util');
-    client.get = util.promisify(client.get);
-
-    // Check if there is an entry in the redis cache server
-    // for the provided query (key)
-    const cachedBlogs = client.get(req.user.id);
-
-    // If there is, then return that cached list of blogs
-
-    // Else, call mongoose to fetch the list of blogs
-    const blogs = await Blog.find({ _user: req.user.id });
-
-    res.send(blogs);
+      res.send(blogs);
+    } catch (error) {
+      res.status(500).send(error);
+    }
   });
 
   // Route Handler for creating a new Blog document for the
   // looged in User
-  app.post('/api/blogs', requireLogin, async (req, res) => {
+  app.post('/api/blogs', requireLogin, cleanCache, async (req, res) => {
     const title = req.body.title;
     const content = req.body.content;
 
@@ -67,7 +73,7 @@ module.exports = app => {
 
       res.send(blog);
     } catch (error) {
-      res.send(500, error);
+      res.status(500).send(error);
     }
   });
 };

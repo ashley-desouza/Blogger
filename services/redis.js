@@ -22,7 +22,42 @@ const client = redis.createClient(redisUrl);
 /*******************************************************************
  Promisify the Redis client's `get` Method
 ********************************************************************/
-client.get = util.promisify(client.get);
+client.hget = util.promisify(client.hget);
+
+/**
+ * Method to indicate if the current Query Instance should use the
+ * Redis Cache Server
+ *
+ * @param {Object} options - An Object of any options that are
+ * provided to the cache Method
+ *
+ * @return {Query} this
+ */
+mongoose.Query.prototype.cache = function(options = {}) {
+  // Semaphore to indicate that we
+  // want to use the Redis Cache Server for
+  // this Mongoose Query Instance
+  this._useCache = true;
+
+  // Define a Hash Key to use for this Query Instance
+  // Remember, to stringify  the incoming key because
+  // Redis only works with Strings and Numbers.
+  // If no key is provided, default to 'defaultHashKey'
+  this._hashKey = JSON.stringify(options.key || 'defaultHashKey');
+
+  /************************************************************************
+    Return the Mongoose Query Instance
+
+    This is IMPORTANT because it allows for
+    function chaining -
+    Example -
+    Blog.find({ _user: req.user.id }).cache().limit(10);
+
+    Refer -
+    https://github.com/Automattic/mongoose/blob/master/lib/query.js#L1679
+  *************************************************************************/
+  return this;
+};
 
 /*********************************************************************
  Make a copy of the original Mongoose `exec` Method on the `Query`
@@ -58,6 +93,12 @@ const exec = mongoose.Query.prototype.exec;
  * @return {Promise}
  ***********************************************************************/
 mongoose.Query.prototype.exec = async function() {
+  if (!this._useCache) {
+    // DO NOT USE THE REDIS CACHE SERVER
+    // Get the result from MongoDB
+    return exec.apply(this, arguments);
+  }
+
   /************************************************************************
     The getQuery() method 
     Returns the current query conditions as a JSON object.
@@ -94,20 +135,21 @@ mongoose.Query.prototype.exec = async function() {
 
   // Check if there is an entry in the Redis Cache server with the
   // generated key
-  const cacheValue = await client.get(key);
+  const cacheValue = await client.hget(this._hashKey, key);
 
   if (cacheValue) {
     console.log('Results coming from the Redis Cache Server');
     console.log('------------------------------------------');
     // There is an entry in the Redis Cache server with the
     // generated key. Return the result from the Cache Server
-    // First, hydrate and MongoDB Model or Array of Models.
+    // First, hydrate the MongoDB Model or Array of Models.
 
     // Parse the JSON do that we can use the `Array.isArray`
     // method on it
     const doc = JSON.parse(cacheValue);
 
     if (Array.isArray(doc)) {
+      // Hydrate the Array of Model Instances
       return doc.map(d => new this.model(d));
     } else {
       // Hydrate a single MongoDB Model Instance
@@ -140,8 +182,16 @@ mongoose.Query.prototype.exec = async function() {
     `MongoDB Model Instances or Documents` when we want to return 
     them to the client.
   ********************************************************************/
-  client.set(key, JSON.stringify(result));
+  client.hset(this._hashKey, key, JSON.stringify(result));
 
   // Finally, return the result from MongoDB to the client
   return result;
+};
+
+const clearHash = function(hashKey) {
+  client.del(JSON.stringify(hashKey));
+};
+
+module.exports = {
+  clearHash
 };

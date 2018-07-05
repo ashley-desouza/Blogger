@@ -26,7 +26,7 @@ require('./services/passport');
 /*******************************************************************
  Require the cache services file
 ********************************************************************/
-require('./services/cache');
+require('./services/redis');
 
 // Mongoose's built in promise library is deprecated, replace it with
 // ES2015 Promise
