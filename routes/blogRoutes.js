@@ -61,10 +61,12 @@ module.exports = app => {
   app.post('/api/blogs', requireLogin, cleanCache, async (req, res) => {
     const title = req.body.title;
     const content = req.body.content;
+    const imageUrl = req.body.imageUrl;
 
     const blog = new Blog({
       title,
       content,
+      imageUrl,
       _user: req.user.id
     });
 

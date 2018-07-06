@@ -7,8 +7,22 @@ export const fetchUser = () => async dispatch =>
     payload: (await axios.get('/api/current_user')).data
   });
 
-export const submitBlog = (values, history) => async dispatch => {
-  const res = await axios.post('/api/blogs', values);
+export const submitBlog = (values, file, history) => async dispatch => {
+  // Get the presignedUrl from AWS S3
+  const uploadConfig = await axios.get('/api/upload');
+
+  // Issue a PUT request for the image file (an Object for AWS S3) to the
+  // AWS S3 Bucket
+  await axios.put(uploadConfig.data.url, file, {
+    headers: {
+      'Content-Type': file.type
+    }
+  });
+
+  const res = await axios.post('/api/blogs', {
+    ...values,
+    imageUrl: uploadConfig.data.key
+  });
 
   // Redirect the user the /blogs route - The Dashboard
   history.push('/blogs');
