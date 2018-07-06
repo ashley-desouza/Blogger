@@ -4,6 +4,12 @@
 const mongoose = require('mongoose');
 
 /*******************************************************************
+  Import the config file -
+  It contains the redis Url
+********************************************************************/
+const keys = require('./../config/keys');
+
+/*******************************************************************
  Import the util module
 ********************************************************************/
 const util = require('util');
@@ -16,7 +22,7 @@ const redis = require('redis');
 /*******************************************************************
  Setup a Redis client connection
 ********************************************************************/
-const redisUrl = 'redis://127.0.0.1:6379';
+const redisUrl = keys.redisUrl;
 const client = redis.createClient(redisUrl);
 
 /*******************************************************************
@@ -60,23 +66,23 @@ mongoose.Query.prototype.cache = function(options = {}) {
 };
 
 /*********************************************************************
- Make a copy of the original Mongoose `exec` Method on the `Query`
- Class. Please Refer to -
- https://github.com/Automattic/mongoose/blob/master/lib/query.js#L3308
+  Make a copy of the original Mongoose `exec` Method on the `Query`
+  Class. Please Refer to -
+  https://github.com/Automattic/mongoose/blob/master/lib/query.js#L3308
 
- The goal behind doing this is that we want to inject some code into
- this Native Method to check if the requested resource is in the
- Redis Cache Server or not.
+  The goal behind doing this is that we want to inject some code into
+  this Native Method to check if the requested resource is in the
+  Redis Cache Server or not.
 
- If it is present in the Redis Cache Server, then we return that record
- back to the client.
+  If it is present in the Redis Cache Server, then we return that record
+  back to the client.
 
- If it is not, then we forward the request to Mongoose's original
- `exec` Method. We then return the results to the client.
+  If it is not, then we forward the request to Mongoose's original
+  `exec` Method. We then return the results to the client.
 ***********************************************************************/
 const exec = mongoose.Query.prototype.exec;
 
-/**********************************************************************
+/**
  * This is our Implementation of the `exec` method
  * where we check if a record is present in the Redis Cache Server.
  *
@@ -90,8 +96,9 @@ const exec = mongoose.Query.prototype.exec;
  *
  * query.exec(callback);
  * query.exec('find', callback);
- * @return {Promise}
- ***********************************************************************/
+ *
+ * @return {Promise} - The Promise that resolves with the MongoDB Model Instance
+ */
 mongoose.Query.prototype.exec = async function() {
   if (!this._useCache) {
     // DO NOT USE THE REDIS CACHE SERVER
@@ -188,9 +195,16 @@ mongoose.Query.prototype.exec = async function() {
   return result;
 };
 
-const clearHash = function(hashKey) {
+/**
+ * A Function that clears the Redis Cache for the provided Hash Key
+ *
+ * @param {*} hashKey - The Redis Hash Key
+ *
+ * @returns {undefined}
+ */
+function clearHash(hashKey) {
   client.del(JSON.stringify(hashKey));
-};
+}
 
 module.exports = {
   clearHash

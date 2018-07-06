@@ -4,7 +4,6 @@ import { fetchBlog } from '../../actions';
 
 class BlogShow extends Component {
   componentDidMount() {
-    console.log('this.props:', this.props);
     this.props.fetchBlog(this.props.match.params._id);
   }
 

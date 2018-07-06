@@ -63,4 +63,7 @@ typings/
 # Development Keys
 development.js
 
-# 
+# mac
+.DS_Store
+
+nohup.out

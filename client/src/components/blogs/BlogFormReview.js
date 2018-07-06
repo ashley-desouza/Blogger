@@ -7,6 +7,10 @@ import { withRouter } from 'react-router-dom';
 import formFields from './formFields';
 
 class BlogFormReview extends Component {
+  // Create-React-App gives us a shortcut to declare Initial Component State
+  // instead of using a constructor
+  state = { file: null };
+
   renderFields() {
     const { formValues } = this.props;
 
@@ -44,15 +48,27 @@ class BlogFormReview extends Component {
 
     const { submitBlog, history, formValues } = this.props;
 
-    submitBlog(formValues, history);
+    submitBlog(formValues, this.state.file, history);
+  }
+
+  handleImageUpload(event) {
+    // Our Image Uploader can ONLY upload 1 Image at a time
+    // Hence, we pick up the 1st entry in the FilesList Array
+    this.setState({ file: event.target.files[0] });
   }
 
   render() {
     return (
-      <form onSubmit={this.onSubmit.bind(this)}>
+      <form onSubmit={event => this.onSubmit(event)}>
         <h5>Please confirm your entries</h5>
         {this.renderFields()}
 
+        <h6>Attach an Image</h6>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={event => this.handleImageUpload(event)}
+        />
         {this.renderButtons()}
       </form>
     );
